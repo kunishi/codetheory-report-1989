@@ -1,0 +1,45 @@
+\input tgrindmac
+\nopagenumbers
+\L{\LB{\K{program} main;}}
+\L{\LB{  \K{begin}}}
+\L{\LB{    Read the values of $n$ and $d$;}}
+\L{\LB{    Prepare an area for $P$;}}
+\L{\LB{    $k$ := $(n+1)/2$;}}
+\L{\LB{    Make a column\-non\-descending matrix $M(0)$ consisting of all the }}
+\L{\LB{      vectors that have weights not less than $d-1$;}}
+\L{\LB{    \K{for} every vector $v$ in $\{0,1\}^k$}}
+\L{\LB{      DEP($v, 0$) := weight($v$);}}
+\L{\LB{    $A(1)$ := @(the first vector of $M(0)$);}}
+\L{\LB{    call search($i$)}}
+\L{\LB{  \K{end}.}}
+\L{\LB{}}
+\L{\LB{\K{procedure} search($i$);}}
+\L{\LB{  \K{begin}}}
+\L{\LB{    \K{do} \K{while} $A(i)$ = @(the last ($k-i-1$)th vector of $M(i)$)}}
+\L{\LB{      \K{begin}}}
+\L{\LB{        $u$ := the vector pointed by $A(i)$;}}
+\L{\LB{        Put $u$ on the $i$\-th column of $P$;}}
+\L{\LB{        \K{if} rows of the matrix of the left $i$ columns of $P$ are arranged}}
+\L{\LB{          in NDB(NAB)  \K{then}}}
+\L{\LB{          \K{if} $i = k$  \K{then}}}
+\L{\LB{            \K{begin}}}
+\L{\LB{              Write $P$ as a solution;}}
+\L{\LB{              exit}}
+\L{\LB{            \K{end}}}
+\L{\LB{}\Tab{8}{  \K{else}  \C{}(*  i \< k *)\CE{}}}
+\L{\LB{}\Tab{8}{    \K{begin}}}
+\L{\LB{}\Tab{8}{      $n$ := number of the vectors $v$ of $M(i)$ s.t. weight($v$) $\geq d-1$;}}
+\L{\LB{}\Tab{8}{      \K{if} $n\geq k-i$  \K{then}}}
+\L{\LB{}\Tab{16}{\K{begin}}}
+\L{\LB{}\Tab{16}{  \K{for} every vector $v$}}
+\L{\LB{}\Tab{16}{    DEP($v, i$) := min(DEP($v, i-1$), DEP$(v\,\oplus\,u, i-1)+1$);}}
+\L{\LB{}\Tab{16}{    Make $M(i+1)$ consisting of all the vectors $v$ in $M(i)$}}
+\L{\LB{}\Tab{16}{      s.t. DEP($v, i$) $\geq d-1$;}}
+\L{\LB{}\Tab{16}{  $A(i+1)$ := @(the first vector of $M(i+1)$);}}
+\L{\LB{}\Tab{16}{  call search($i+1$)}}
+\L{\LB{}\Tab{16}{\K{end}}}
+\L{\LB{}\Tab{8}{    \K{end};}}
+\L{\LB{}\Tab{8}{$A(i)$ := @(the next of the vector to which $A(i)$ is pointing currently)}}
+\L{\LB{      \K{end}}}
+\L{\LB{  \K{end}.}}
+\vfill\eject\end

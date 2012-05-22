@@ -1,0 +1,250 @@
+\input tgrindmac
+\File{ver6.c},{17:24},{Oct 30 1989}
+\L{\LB{\C{}\/*}}
+\L{\LB{ *}}
+\L{\LB{ *}\Tab{8}{searching of a (n, (n+1)\/2) code with the given distance d.}}
+\L{\LB{ *}}
+\L{\LB{ *\/\CE{}}}
+\L{\LB{}}
+\L{\LB{\K{\#include} \<stdio.h\>}}
+\L{\LB{\K{\#include} \<sys\/vtimes.h\>}}
+\L{\LB{}}
+\L{\LB{\K{typedef} \K{unsigned} \K{short}}\Tab{24}{uShort;}}
+\L{\LB{}}
+\L{\LB{\K{\#define}}\Tab{8}{exp2(n)}\Tab{16}{(1\<\<(n))}}
+\L{\LB{\K{\#define} mask(n)}\Tab{16}{(exp2(n))}}
+\L{\LB{\K{\#define}}\Tab{8}{weight(c)}\Tab{24}{(dependTab[0][c])}}
+\L{\LB{\K{\#define}}\Tab{8}{min(x,y)}\Tab{24}{((x)\<(y)?(x):(y))}}
+\L{\LB{\K{\#define}}\Tab{8}{max(x,y)}\Tab{24}{((x)\>(y)?(x):(y))}}
+\L{\LB{}}
+\L{\LB{\K{\#define}}\Tab{8}{MAXK}\Tab{16}{16}}
+\L{\LB{\K{\#define}}\Tab{8}{TRUE}\Tab{16}{1}}
+\L{\LB{\K{\#define}}\Tab{8}{FALSE}\Tab{16}{0}}
+\L{\LB{\K{\#define}}\Tab{8}{CRITERIA}\Tab{24}{0}}
+\L{\LB{}}
+\L{\LB{\K{char}}\Tab{8}{dependTab[MAXK][exp2(MAXK)];}}
+\L{\LB{}}
+\L{\LB{uShort}\Tab{8}{pool[MAXK][exp2(MAXK)];}}
+\L{\LB{uShort}\Tab{8}{*poolptr[MAXK + 1];}}
+\L{\LB{uShort}\Tab{8}{rowValue[MAXK + 1][MAXK + 1];}}
+\L{\LB{}}
+\L{\LB{\K{int}}\Tab{8}{n, k, m, d;}}
+\L{\LB{\K{int}}\Tab{8}{poolnum[MAXK];}}
+\L{\LB{}}
+\L{\LB{\K{struct} vtimes}\Tab{16}{vtms;}}
+\L{\LB{}}
+\L{\LB{\K{extern}}\Tab{8}{\K{void}}\Tab{16}{matrixInit(), printVec(), printResult(), calWeight();}}
+\L{\LB{}}
+\L{\LB{\K{void}}\Tab{8}{main(argc, argv)}}
+\L{\LB{}\Tab{8}{\K{int}}\Tab{16}{argc;}}
+\L{\LB{}\Tab{8}{\K{char}}\Tab{16}{*argv[];}}
+\L{\LB{\{}}
+\L{\LB{}\Tab{8}{\K{int}}\Tab{16}{ac = argc \- 1;}}
+\L{\LB{}\Tab{8}{\K{char}}\Tab{16}{**av = argv + 1;}}
+\L{\LB{}\Tab{8}{}}
+\L{\LB{}\Tab{8}{n = atoi(av[0]);}}
+\L{\LB{}\Tab{8}{d = atoi(av[1]);}}
+\L{\LB{}\Tab{8}{\K{if} (n \% 2 != 1)  \{}}
+\L{\LB{}\Tab{16}{fprintf(stderr, \S{}\"N must be \!\"Kisuu\!\". Try again.\!n\"\SE{});}}
+\L{\LB{}\Tab{16}{exit(0);}}
+\L{\LB{}\Tab{8}{\}}}
+\L{\LB{}\Tab{8}{k = (n + 1) \/ 2;}}
+\L{\LB{}\Tab{8}{m = n \- k;}}
+\L{\LB{}\Tab{8}{}}
+\L{\LB{}\Tab{8}{matrixInit();}}
+\L{\LB{}}
+\L{\LB{}\Tab{8}{poolptr[1] = pool[1];}}
+\L{\LB{}\Tab{8}{printResult(search(1));}}
+\L{\LB{\}}}
+\L{\LB{}}
+\L{\LB{\K{void}}\Tab{8}{matrixInit()}}
+\L{\LB{\{}}
+\L{\LB{}\Tab{8}{\K{int}}\Tab{16}{i, j;}}
+\L{\LB{}\Tab{8}{\K{int}}\Tab{16}{w = 0;}}
+\L{\LB{}\Tab{8}{uShort}\Tab{16}{*pptr;}}
+\L{\LB{}\Tab{8}{}}
+\L{\LB{}\Tab{8}{printf(\S{}\"(n,k,m,d) = (\%d,\%d,\%d,\%d)\!n\"\SE{}, n, k, m, d);}}
+\L{\LB{\K{\#ifdef} NAB}}
+\L{\LB{}\Tab{8}{printf(\S{}\"Select row NAB order \"\SE{});}}
+\L{\LB{\K{\#else}}}
+\L{\LB{}\Tab{8}{printf(\S{}\"Select row NDB order \"\SE{});}}
+\L{\LB{\K{\#endif}}}
+\L{\LB{\K{\#ifdef} NAB}}
+\L{\LB{}\Tab{8}{\C{}\/* column NAB order *\/\CE{}}}
+\L{\LB{}\Tab{8}{printf(\S{}\"and column NAB order.\!n\"\SE{});}}
+\L{\LB{}\Tab{8}{\K{for} (i = exp2(m) \- 1, pptr = pool[1], poolnum[1] = 0; i \>= 0; i \-\-)  \{}}
+\L{\LB{\K{\#else}}}
+\L{\LB{}\Tab{8}{\C{}\/* column NDB order *\/\CE{}}}
+\L{\LB{}\Tab{8}{printf(\S{}\"and column NDB order.\!n\"\SE{});}}
+\L{\LB{}\Tab{8}{\K{for} (i = 0, pptr = pool[1], poolnum[1] = 0; i \<= exp2(m) \- 1; i ++)  \{}}
+\L{\LB{\K{\#endif}}}
+\L{\LB{}\Tab{16}{*pptr = 0;}}
+\L{\LB{}\Tab{16}{\K{for} (j = 0; j \< m; j ++)  \{}}
+\L{\LB{}\Tab{24}{weight(i) += ((i \& mask(j)) != 0);}}
+\L{\LB{}\Tab{16}{\}}}
+\L{\LB{}\Tab{16}{\K{if} (weight(i) \>= d \- 1)  \{}}
+\L{\LB{}\Tab{24}{*pptr = i;}}
+\L{\LB{}\Tab{24}{pptr ++;}}
+\L{\LB{}\Tab{24}{poolnum[1] ++;}}
+\L{\LB{}\Tab{16}{\}}}
+\L{\LB{}\Tab{8}{\}}}
+\L{\LB{\}}}
+\L{\LB{}}
+\L{\LB{\K{int}}\Tab{8}{search(lev)}}
+\L{\LB{}\Tab{8}{\K{int}}\Tab{16}{lev;}}
+\L{\LB{\{}}
+\L{\LB{}\Tab{8}{\K{int}}\Tab{16}{i, count = 0;}}
+\L{\LB{}\Tab{8}{uShort}\Tab{16}{u;}}
+\L{\LB{}\Tab{8}{uShort}\Tab{16}{*next;}}
+\L{\LB{}\Tab{8}{\K{int}}\Tab{16}{v;}}
+\L{\LB{}\Tab{8}{\K{int}}\Tab{16}{orderingFlag = TRUE;}}
+\L{\LB{}\Tab{8}{\K{int}}\Tab{16}{number;}}
+\L{\LB{}\Tab{8}{}}
+\L{\LB{}\Tab{8}{\K{do}  \{}}
+\L{\LB{}\Tab{16}{u = *poolptr[lev];}}
+\L{\LB{}\Tab{16}{\K{for} (i = 0; i \< m; i ++)  \{}}
+\L{\LB{}\Tab{24}{rowValue[lev][i] = rowValue[lev \- 1][i] \<\< 1;}}
+\L{\LB{}\Tab{24}{rowValue[lev][i] += ((u \& mask(m \- i \- 1)) != 0);}}
+\L{\LB{}\Tab{24}{\K{if} (i}}
+\L{\LB{}\Tab{24}{ \&\& orderingFlag}}
+\L{\LB{\K{\#ifdef} NAB}}
+\L{\LB{}\Tab{16}{\C{}\/* row NAB order *\/\CE{}}}
+\L{\LB{}\Tab{24}{ \&\& rowValue[lev][i \- 1] \< rowValue[lev][i])  \{}}
+\L{\LB{\K{\#else}}}
+\L{\LB{}\Tab{16}{\C{}\/* row NDB order *\/\CE{}}}
+\L{\LB{}\Tab{24}{ \&\& rowValue[lev][i \- 1] \> rowValue[lev][i])  \{}}
+\L{\LB{\K{\#endif}}}
+\L{\LB{}\Tab{32}{orderingFlag = FALSE;}}
+\L{\LB{}\Tab{24}{\}}}
+\L{\LB{}\Tab{16}{\}}}
+\L{\LB{}\Tab{16}{\K{if} (orderingFlag)  \{}}
+\L{\LB{}\Tab{24}{\K{if} (lev == k)  \{}}
+\L{\LB{}\Tab{32}{printResult(TRUE);}}
+\L{\LB{}\Tab{32}{exit(0);}}
+\L{\LB{}\Tab{24}{\C{}\/*}\Tab{32}{return TRUE;*\/\CE{}}}
+\L{\LB{}\Tab{24}{\}}}
+\L{\LB{}\Tab{24}{\K{else}  \{}\Tab{40}{\C{}\/* lev \< k *\/\CE{}}}
+\L{\LB{}\Tab{32}{\K{if} (lev \< CRITERIA)  \{}}
+\L{\LB{}\Tab{40}{number = poolnum[lev] \- count;}}
+\L{\LB{}\Tab{32}{\}}}
+\L{\LB{}\Tab{32}{\K{else}  \{}}
+\L{\LB{}\Tab{40}{\K{for} (next = poolptr[lev] + 1, number = 0;}}
+\L{\LB{}\Tab{40}{     next \< \&pool[lev][poolnum[lev]];}}
+\L{\LB{}\Tab{40}{     next ++)  \{}}
+\L{\LB{}\Tab{48}{\K{if} (dependTab[lev \- 1][*next \^ u] + 1 \>= d \- 1)  \{}}
+\L{\LB{}\Tab{56}{number ++;}}
+\L{\LB{}\Tab{48}{\}}}
+\L{\LB{}\Tab{40}{\}}}
+\L{\LB{}\Tab{32}{\}}}
+\L{\LB{}\Tab{32}{\K{if} (number \>= k \- lev)  \{}}
+\L{\LB{}\Tab{40}{poolnum[lev + 1] = number;}}
+\L{\LB{}\Tab{40}{\K{for} (v = 0; v \< exp2(m); v ++)  \{}}
+\L{\LB{}\Tab{48}{dependTab[lev][v] = min(dependTab[lev \- 1][v],}}
+\L{\LB{}\Tab{56}{dependTab[lev \- 1][v \^ u] + 1);}}
+\L{\LB{}\Tab{40}{\}}}
+\L{\LB{}\Tab{40}{\K{for} (next = poolptr[lev] + 1, poolnum[lev + 1] = 0;}}
+\L{\LB{}\Tab{40}{     next \< \&pool[lev][poolnum[lev]];}}
+\L{\LB{}\Tab{40}{     next ++)  \{}}
+\L{\LB{}\Tab{48}{\K{if} (dependTab[lev][*next] \>= d \- 1)  \{}}
+\L{\LB{}\Tab{56}{pool[lev + 1][poolnum[lev + 1] ++] = *next;}}
+\L{\LB{}\Tab{48}{\}}}
+\L{\LB{}\Tab{40}{\}}}
+\L{\LB{}\Tab{40}{poolptr[lev + 1] = \&pool[lev + 1][0];}}
+\L{\LB{}\Tab{40}{search(lev + 1);}}
+\L{\LB{}\Tab{32}{\}}}
+\L{\LB{}\Tab{24}{\}}}
+\L{\LB{}\Tab{16}{\}}}
+\L{\LB{}\Tab{16}{orderingFlag = TRUE;}}
+\L{\LB{}\Tab{16}{poolptr[lev] ++;}}
+\L{\LB{}\Tab{16}{count ++;}}
+\L{\LB{}\Tab{8}{\}  \K{while} (poolptr[lev] \<= \&pool[lev][poolnum[lev] \- k + lev]);}}
+\L{\LB{}\Tab{8}{\K{return} FALSE;}}
+\L{\LB{\}}}
+\L{\LB{}}
+\L{\LB{\K{void}}\Tab{8}{printResult(flag)}}
+\L{\LB{}\Tab{8}{\K{int}}\Tab{16}{flag;}}
+\L{\LB{\{}}
+\L{\LB{}\Tab{8}{\K{int}}\Tab{16}{i;}}
+\L{\LB{}\Tab{8}{}}
+\L{\LB{}\Tab{8}{\K{if} (flag == FALSE)  \{}}
+\L{\LB{}\Tab{16}{printf(\S{}\"***No code was found.\!n\"\SE{});}}
+\L{\LB{}\Tab{8}{\}}}
+\L{\LB{}\Tab{8}{\K{else}  \{}}
+\L{\LB{}\Tab{16}{printf(\S{}\"***Code was found.  Trans. of Parity check matrix is:\!n\"\SE{});}}
+\L{\LB{}\Tab{16}{\K{for} (i = m \- 1; i \>= 0; i \-\-)  \{}}
+\L{\LB{}\Tab{24}{printVec(exp2(i));}}
+\L{\LB{}\Tab{16}{\}}}
+\L{\LB{}\Tab{16}{\K{for} (i = 1; i \<= k; i ++)  \{}}
+\L{\LB{}\Tab{24}{printVec(*poolptr[i]);}}
+\L{\LB{}\Tab{16}{\}}}
+\L{\LB{}\Tab{16}{calWeight();}}
+\L{\LB{}\Tab{8}{\}}}
+\L{\LB{}\Tab{8}{printf(\S{}\"\!n\"\SE{});}}
+\L{\LB{}\Tab{8}{vtimes(\&vtms, NULL);}}
+\L{\LB{}\Tab{8}{printf(\S{}\"***CPU Time = \%0.1f + \%0.1f.***\!n\"\SE{},}}
+\L{\LB{}\Tab{16}{(\K{double})vtms.vm\_utime\/60,}}
+\L{\LB{}\Tab{16}{(\K{double})vtms.vm\_stime\/60);}}
+\L{\LB{\}}}
+\L{\LB{}}
+\L{\LB{\K{void}}\Tab{8}{printVec(v)}}
+\L{\LB{}\Tab{8}{\K{int}}\Tab{16}{v;}}
+\L{\LB{\{}}
+\L{\LB{}\Tab{8}{\K{int}}\Tab{16}{i;}}
+\L{\LB{}}
+\L{\LB{}\Tab{8}{\K{for} (i = m \- 1; i \>= 0; i\-\-)  \{}}
+\L{\LB{}\Tab{16}{\K{if} (v \& exp2(i))  \{}}
+\L{\LB{}\Tab{24}{printf(\S{}\"1\"\SE{});}}
+\L{\LB{}\Tab{16}{\}}}
+\L{\LB{}\Tab{16}{\K{else}  \{}}
+\L{\LB{}\Tab{24}{printf(\S{}\"0\"\SE{});}}
+\L{\LB{}\Tab{16}{\}}}
+\L{\LB{}\Tab{8}{\}}}
+\L{\LB{}\Tab{8}{printf(\S{}\"\!n\"\SE{});}}
+\L{\LB{\}}}
+\L{\LB{}}
+\L{\LB{\K{void}}\Tab{8}{calWeight()}}
+\L{\LB{\{}}
+\L{\LB{}\Tab{8}{\K{unsigned} \K{long}}\Tab{24}{weightVec[MAXK], weightOfThisCodeWord;}}
+\L{\LB{}\Tab{8}{\K{int}}\Tab{16}{weightCount[MAXK * 2];}}
+\L{\LB{}\Tab{8}{uShort}\Tab{16}{info;}}
+\L{\LB{}\Tab{8}{\K{unsigned} \K{int}}\Tab{24}{code;}}
+\L{\LB{}\Tab{8}{\K{int}}\Tab{16}{i, j;}}
+\L{\LB{}\Tab{8}{}}
+\L{\LB{}\Tab{8}{\K{for} (i = 0; i \<= n; i ++)  \{}}
+\L{\LB{}\Tab{16}{weightCount[i] = 0;}}
+\L{\LB{}\Tab{8}{\}}}
+\L{\LB{}}
+\L{\LB{}\Tab{8}{printf(\S{}\"\!n***Code Genetate Matrix is:\!n\"\SE{});}}
+\L{\LB{}\Tab{8}{\K{for} (i = 0; i \< k; i ++)  \{}}
+\L{\LB{}\Tab{16}{weightVec[i] = (*poolptr[i + 1] \<\< k) + exp2(k \- i \- 1);}}
+\L{\LB{}\Tab{16}{\K{for} (j = n \- 1; j \>= 0; j\-\-)  \{}}
+\L{\LB{}\Tab{24}{\K{if} (weightVec[i] \& exp2(j))  \{}}
+\L{\LB{}\Tab{32}{printf(\S{}\"1\"\SE{});}}
+\L{\LB{}\Tab{24}{\}}}
+\L{\LB{}\Tab{24}{\K{else}  \{}}
+\L{\LB{}\Tab{32}{printf(\S{}\"0\"\SE{});}}
+\L{\LB{}\Tab{24}{\}}}
+\L{\LB{}\Tab{16}{\}}}
+\L{\LB{}\Tab{16}{printf(\S{}\"\!n\"\SE{});}}
+\L{\LB{}\Tab{8}{\}}}
+\L{\LB{}}
+\L{\LB{}\Tab{8}{printf(\S{}\"***Weights of this code is: (from 0 to \%d)\!n\"\SE{}, n);}}
+\L{\LB{}\Tab{8}{\K{for} (info = 0; info \< exp2(k); info ++)  \{}}
+\L{\LB{}\Tab{16}{code = weightOfThisCodeWord = 0;}}
+\L{\LB{}\Tab{16}{\K{for} (i = 0; i \< k; i ++)  \{}}
+\L{\LB{}\Tab{24}{\K{if} ((info \& mask(k \- i \- 1)) != 0)  \{}}
+\L{\LB{}\Tab{32}{code \^= weightVec[i];}}
+\L{\LB{}\Tab{24}{\}}}
+\L{\LB{}\Tab{16}{\}}}
+\L{\LB{}\Tab{16}{\K{for} (i = 0; i \< n; i ++)  \{}}
+\L{\LB{}\Tab{24}{weightOfThisCodeWord += ((code \& mask(i)) != 0);}}
+\L{\LB{}\Tab{16}{\}}}
+\L{\LB{}\Tab{16}{weightCount[weightOfThisCodeWord] ++;}}
+\L{\LB{}\Tab{8}{\}}}
+\L{\LB{}\Tab{8}{}}
+\L{\LB{}\Tab{8}{\K{for} (i = 0; i \<= n; i ++)  \{}}
+\L{\LB{}\Tab{16}{printf(\S{}\"\%d \"\SE{}, weightCount[i]);}}
+\L{\LB{}\Tab{8}{\}}}
+\L{\LB{\}}}
+\L{\LB{}}
+\vfill\eject\end

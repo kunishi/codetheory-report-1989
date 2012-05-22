@@ -1,0 +1,41 @@
+program main;
+  begin
+    Read the values of n and d;
+    k := (n+1)/2;
+    Make a column-non-descending matrix M(0) consisting of all the 
+      vectors that have weights not less than d-1;
+    for every vector v in {0,1}^k
+      DEP(v, 0) := weight(v);
+    A(1) := @(the first vector of M(0));
+    call search(i)
+  end.
+
+procedure search(i);
+  begin
+    do while A(i) = @(the (k-i-1)th vector of M(i))
+      begin
+        u := the vector pointed by A(i);
+        Put u on the i-th column of P;
+        if rows of the matrix of the left i columns of P are arranged
+          in NDB(NAB)  then
+          if i = k  then
+            begin
+              Write P as a solution;
+              exit
+            end
+	  else  (* i < k *)
+	    begin
+	      n := number of the vectors v of M(i) s.t. weight(v) >= d-1;
+	      if n >= k-i  then
+		begin
+		  for every vector v
+		    DEP(v, i) := min(DEP(v, i-1), DEP(v^u, i-1)+1);
+		    Make M(i+1) consisting of all the vectors v in M(i)
+		      s.t. DEP(v, i) >= d-1;
+		  A(i + 1) := @(the first vector of M(i + 1));
+		  call search(i + 1)
+		end
+	    end;
+	A(i) := @(the next of the vector to which A(i) is pointing currently)
+      end
+  end.
